@@ -43,6 +43,7 @@ const favEditToggle = $('fav-edit-toggle');
 const listTitle = $('list-title');
 const itemList = $('item-list');
 const listEmpty = $('list-empty');
+const listDone = $('list-done');
 const clearChecked = $('clear-checked');
 const toast = $('toast');
 const toastText = $('toast-text');
@@ -173,9 +174,7 @@ function render() {
 
   // 「あと何個？」
   const remaining = state.items.filter((i) => !i.checked).length;
-  if (state.items.length === 0) listTitle.textContent = 'リスト';
-  else if (remaining === 0) listTitle.textContent = 'リスト（ぜんぶ買えました！）';
-  else listTitle.textContent = `リスト（あと${remaining}つ）`;
+  listTitle.textContent = remaining > 0 ? `リスト（あと${remaining}つ）` : 'リスト';
 
   // リスト（買っていないもの → チェック済みの順）
   const ordered = [
@@ -211,6 +210,7 @@ function render() {
     itemList.append(li);
   }
   listEmpty.hidden = state.items.length > 0;
+  listDone.hidden = !(state.items.length > 0 && remaining === 0);
   clearChecked.hidden = !state.items.some((i) => i.checked);
 }
 

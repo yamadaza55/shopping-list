@@ -5,6 +5,7 @@
   --text: #1b1f1b;
   --muted: #6b746b;
   --line: #dfe5df;
+  --input-line: #8f9a8f;
   --green: #2e7d32;
   --green-text: #ffffff;
   --green-soft: #e6f2e7;
@@ -20,6 +21,7 @@
     --text: #eef2ee;
     --muted: #9aa49a;
     --line: #2f372f;
+    --input-line: #6f7a6f;
     --green: #66bb6a;
     --green-text: #0d1a0d;
     --green-soft: #213321;
@@ -68,7 +70,7 @@ main {
   padding: 16px;
 }
 
-h2 { font-size: 16px; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+h2 { font-size: 17px; color: var(--text); margin: 0 0 8px; font-weight: 700; }
 
 section { margin-top: 20px; }
 
@@ -80,11 +82,12 @@ section { margin-top: 20px; }
   font-size: 18px;
   padding: 12px 14px;
   min-height: 52px;
-  border: 2px solid var(--line);
+  border: 2px solid var(--input-line);
   border-radius: 12px;
   background: var(--card);
   color: var(--text);
 }
+.add-form input::placeholder { color: var(--muted); }
 .add-form input:focus { outline: none; border-color: var(--green); }
 
 .btn-primary {
@@ -106,14 +109,14 @@ section { margin-top: 20px; }
   color: var(--green);
   font-size: 16px;
   font-weight: 700;
-  padding: 8px 4px;
+  min-height: 44px;
+  padding: 8px 18px;
+  border: 2px solid var(--green);
+  border-radius: 12px;
   cursor: pointer;
 }
 
 .btn-text.done {
-  min-height: 44px;
-  padding: 8px 18px;
-  border-radius: 12px;
   background: var(--green);
   color: var(--green-text);
 }
@@ -239,6 +242,17 @@ section { margin-top: 20px; }
 }
 
 .hint { color: var(--muted); font-size: 15px; margin: 8px 0; }
+
+.done-message {
+  margin: 0 0 8px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--green-soft);
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+}
 
 /* お知らせ（画面下にちょっと出るメッセージ） */
 .toast {
