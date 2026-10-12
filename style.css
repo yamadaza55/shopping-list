@@ -53,6 +53,15 @@ body {
 }
 .app-header h1 { margin: 0; font-size: 22px; }
 
+/* 夜（ダークモード）は上の帯を暗くして、まぶしくないようにする */
+@media (prefers-color-scheme: dark) {
+  .app-header {
+    background: var(--card);
+    color: var(--green);
+    border-bottom: 1px solid var(--line);
+  }
+}
+
 main {
   max-width: 560px;
   margin: 0 auto;
@@ -101,10 +110,46 @@ section { margin-top: 20px; }
   cursor: pointer;
 }
 
-.section-head { display: flex; justify-content: space-between; align-items: center; }
-.section-head h2 { margin: 0; }
+.btn-text.done {
+  min-height: 44px;
+  padding: 8px 18px;
+  border-radius: 12px;
+  background: var(--green);
+  color: var(--green-text);
+}
 
-/* よく買うもの */
+.section-head { display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
+.edit-note { flex: 1; margin: 0; color: var(--danger); font-weight: 600; }
+
+/* よく買うもの（開け閉めできる引き出し） */
+.favorites {
+  margin-top: 20px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.favorites summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 0 16px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.favorites summary::-webkit-details-marker { display: none; }
+.favorites summary::after {
+  content: "▼";
+  font-size: 13px;
+  color: var(--green);
+  transition: transform .2s;
+}
+.favorites[open] summary::after { transform: rotate(180deg); }
+.fav-body { padding: 0 16px 16px; }
+.favorites.editing { background: color-mix(in srgb, var(--danger) 8%, var(--card)); border-color: var(--danger); }
+
 .fav-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .fav-chip {
   font-size: 17px;
@@ -117,6 +162,7 @@ section { margin-top: 20px; }
   cursor: pointer;
 }
 .fav-chip:active { opacity: .7; }
+.fav-chip.in-list { background: var(--green); color: var(--green-text); font-weight: 700; }
 .fav-chip.editing { border-color: var(--danger); background: var(--card); }
 .fav-chip .x { color: var(--danger); font-weight: 700; margin-left: 6px; }
 .fav-form { margin-top: 10px; }
@@ -167,13 +213,14 @@ section { margin-top: 20px; }
 
 .btn-delete {
   flex: none;
-  width: 56px;
+  width: 52px;
   min-height: 60px;
   border: none;
   border-left: 1px solid var(--line);
   background: none;
   color: var(--muted);
-  font-size: 22px;
+  opacity: .6;
+  font-size: 20px;
   cursor: pointer;
 }
 .btn-delete:active { color: var(--danger); }
@@ -210,3 +257,22 @@ section { margin-top: 20px; }
   max-width: calc(100% - 32px);
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.has-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: max-content;
+  padding: 6px 6px 6px 18px;
+}
+.toast.show.has-action { pointer-events: auto; }
+.toast-action {
+  min-height: 44px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 20px;
+  background: var(--green);
+  color: var(--green-text);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}

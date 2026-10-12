@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>のりこの買い物</title>
   <meta name="theme-color" content="#2e7d32" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#121512" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#1d221d" media="(prefers-color-scheme: dark)">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -23,30 +23,36 @@
       <button type="submit" class="btn-primary">追加</button>
     </form>
 
-    <!-- よく買うもの -->
-    <section class="favorites">
-      <div class="section-head">
-        <h2>よく買うもの</h2>
-        <button id="fav-edit-toggle" type="button" class="btn-text">編集</button>
+    <!-- よく買うもの（開け閉めできる引き出し） -->
+    <details id="fav-details" class="favorites">
+      <summary>よく買うもの</summary>
+      <div class="fav-body">
+        <div class="section-head">
+          <p id="fav-edit-note" class="hint edit-note" hidden>タップすると登録から外れます</p>
+          <button id="fav-edit-toggle" type="button" class="btn-text">編集</button>
+        </div>
+        <div id="fav-list" class="fav-list"></div>
+        <p id="fav-empty" class="hint" hidden>「編集」から、よく買うものを登録できます</p>
+        <form id="fav-form" class="add-form fav-form" autocomplete="off" hidden>
+          <input id="fav-input" type="text" placeholder="よく買うものを登録" enterkeyhint="done" aria-label="よく買うもの">
+          <button type="submit" class="btn-primary">登録</button>
+        </form>
       </div>
-      <div id="fav-list" class="fav-list"></div>
-      <p id="fav-empty" class="hint" hidden>「編集」から、よく買うものを登録できます</p>
-      <form id="fav-form" class="add-form fav-form" autocomplete="off" hidden>
-        <input id="fav-input" type="text" placeholder="よく買うものを登録" enterkeyhint="done" aria-label="よく買うもの">
-        <button type="submit" class="btn-primary">登録</button>
-      </form>
-    </section>
+    </details>
 
     <!-- リスト -->
     <section class="list-section">
-      <h2>リスト</h2>
+      <h2 id="list-title">リスト</h2>
       <ul id="item-list" class="item-list"></ul>
       <p id="list-empty" class="hint">まだ何もありません</p>
       <button id="clear-checked" type="button" class="btn-clear" hidden>チェック済みをまとめて消す</button>
     </section>
   </main>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite">
+    <span id="toast-text"></span>
+    <button id="toast-action" type="button" class="toast-action" hidden>元に戻す</button>
+  </div>
 
   <script src="app.js"></script>
 </body>

@@ -20,19 +20,33 @@ function save() {
 let state = load();
 let editingFavorites = false;
 
+// 「よく買うもの」の引き出しを開いているかどうか（最初は閉じておく）
+const UI_KEY = 'shopping-list-ui';
+function loadFavOpen() {
+  try { return localStorage.getItem(UI_KEY) === 'fav-open'; } catch (e) { return false; }
+}
+function saveFavOpen(open) {
+  try { localStorage.setItem(UI_KEY, open ? 'fav-open' : 'fav-closed'); } catch (e) { /* 保存できなくても動く */ }
+}
+
 // ===== 画面の部品 =====
 const $ = (id) => document.getElementById(id);
 const addForm = $('add-form');
 const addInput = $('add-input');
+const favDetails = $('fav-details');
+const favEditNote = $('fav-edit-note');
 const favList = $('fav-list');
 const favEmpty = $('fav-empty');
 const favForm = $('fav-form');
 const favInput = $('fav-input');
 const favEditToggle = $('fav-edit-toggle');
+const listTitle = $('list-title');
 const itemList = $('item-list');
 const listEmpty = $('list-empty');
 const clearChecked = $('clear-checked');
 const toast = $('toast');
+const toastText = $('toast-text');
+const toastAction = $('toast-action');
 
 // ===== 操作 =====
 function newId() {
@@ -52,7 +66,12 @@ function addItem(rawName) {
       showToast(`「${name}」はもう入っています`);
     }
   } else {
-    state.items.push({ id: newId(), name, checked: false });
+    // まだ買っていないものの一番下（チェック済みより上）に入れる
+    const item = { id: newId(), name, checked: false };
+    const firstChecked = state.items.findIndex((i) => i.checked);
+    if (firstChecked === -1) state.items.push(item);
+    else state.items.splice(firstChecked, 0, item);
+    showToast(`「${name}」を追加しました`);
   }
   save();
   render();
@@ -75,10 +94,23 @@ function toggleItem(id) {
   render();
 }
 
+// 消したあと、しばらくは「元に戻す」で戻せる
 function deleteItem(id) {
-  state.items = state.items.filter((i) => i.id !== id);
+  const index = state.items.findIndex((i) => i.id === id);
+  if (index === -1) return;
+  const [removed] = state.items.splice(index, 1);
   save();
   render();
+  showToast(`「${removed.name}」を消しました`, {
+    actionLabel: '元に戻す',
+    duration: 5000,
+    onAction: () => {
+      if (state.items.some((i) => i.name === removed.name)) return;
+      state.items.splice(Math.min(index, state.items.length), 0, removed);
+      save();
+      render();
+    },
+  });
 }
 
 function clearCheckedItems() {
@@ -110,13 +142,15 @@ function removeFavorite(name) {
 
 // ===== 画面を描く =====
 function render() {
-  // よく買うもの
+  // よく買うもの（リストに入っている＝まだ買っていないものは緑で塗る）
+  const waiting = new Set(state.items.filter((i) => !i.checked).map((i) => i.name));
   favList.replaceChildren();
   for (const name of state.favorites) {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'fav-chip' + (editingFavorites ? ' editing' : '');
-    btn.textContent = name;
+    const inList = !editingFavorites && waiting.has(name);
+    btn.className = 'fav-chip' + (editingFavorites ? ' editing' : '') + (inList ? ' in-list' : '');
+    btn.textContent = inList ? `✓ ${name}` : name;
     if (editingFavorites) {
       const x = document.createElement('span');
       x.className = 'x';
@@ -132,7 +166,16 @@ function render() {
   }
   favEmpty.hidden = state.favorites.length > 0 || editingFavorites;
   favForm.hidden = !editingFavorites;
+  favEditNote.hidden = !editingFavorites;
+  favDetails.classList.toggle('editing', editingFavorites);
   favEditToggle.textContent = editingFavorites ? '完了' : '編集';
+  favEditToggle.classList.toggle('done', editingFavorites);
+
+  // 「あと何個？」
+  const remaining = state.items.filter((i) => !i.checked).length;
+  if (state.items.length === 0) listTitle.textContent = 'リスト';
+  else if (remaining === 0) listTitle.textContent = 'リスト（ぜんぶ買えました！）';
+  else listTitle.textContent = `リスト（あと${remaining}つ）`;
 
   // リスト（買っていないもの → チェック済みの順）
   const ordered = [
@@ -173,12 +216,27 @@ function render() {
 
 // ===== お知らせ =====
 let toastTimer;
-function showToast(message) {
-  toast.textContent = message;
+let toastOnAction = null;
+function hideToast() {
+  toast.classList.remove('show');
+  toastOnAction = null;
+}
+function showToast(message, { actionLabel, onAction, duration = 2000 } = {}) {
+  toastText.textContent = message;
+  toastOnAction = onAction || null;
+  toastAction.hidden = !onAction;
+  if (actionLabel) toastAction.textContent = actionLabel;
+  toast.classList.toggle('has-action', !!onAction);
   toast.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+  toastTimer = setTimeout(hideToast, duration);
 }
+toastAction.addEventListener('click', () => {
+  const action = toastOnAction;
+  clearTimeout(toastTimer);
+  hideToast();
+  if (action) action();
+});
 
 // ===== ボタンなどの設定 =====
 addForm.addEventListener('submit', (e) => {
@@ -201,6 +259,16 @@ favEditToggle.addEventListener('click', () => {
 });
 
 clearChecked.addEventListener('click', clearCheckedItems);
+
+favDetails.open = loadFavOpen();
+favDetails.addEventListener('toggle', () => {
+  saveFavOpen(favDetails.open);
+  // 引き出しを閉じたら編集も終わりにする（押し間違いで登録が消えないように）
+  if (!favDetails.open && editingFavorites) {
+    editingFavorites = false;
+    render();
+  }
+});
 
 render();
 
