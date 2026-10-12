@@ -1,6 +1,6 @@
 {
-  "name": "買い物リスト【のりこ用】",
-  "short_name": "買い物リスト",
+  "name": "のりこの買い物",
+  "short_name": "のりこの買い物",
   "description": "買い忘れを防ぐ、自分用の買い物リスト",
   "lang": "ja",
   "start_url": "./",
